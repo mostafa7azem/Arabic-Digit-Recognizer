@@ -12,3 +12,7 @@ for img in imgs:
 
     image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     cv2.imwrite("Data/Grayed/" + img, image)
+
+    blur = cv2.GaussianBlur(image, (3, 3), 0)
+    _, threshold = cv2.threshold(blur, 200, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
+    cv2.imwrite("Data/BlackMasked/" + img, threshold)
