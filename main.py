@@ -4,6 +4,8 @@ import numpy as np
 from keras.optimizers import Adam
 from keras.models import Sequential
 from keras.utils import to_categorical
+from keras.callbacks import EarlyStopping
+from keras.callbacks import ModelCheckpoint
 from keras.layers import Conv2D, MaxPooling2D
 from keras.layers import Dense, Dropout, Flatten
 from sklearn.model_selection import train_test_split
@@ -26,7 +28,7 @@ np_digits = np.array(digits)
 
 np_images = np_images.reshape(-1, 64, 48, 1)
 
-x_train, x_test, y_train, y_test = train_test_split(np_images, np_digits, test_size=0.2, random_state=0)
+x_train, x_test, y_train, y_test = train_test_split(np_images, np_digits, test_size=0.1, random_state=0)
 y_train_categorical = to_categorical(y_train, 10)
 y_test_categorical = to_categorical(y_test, 10)
 
@@ -34,24 +36,28 @@ model = Sequential()
 model.add(Conv2D(64, 7, activation='relu', input_shape=(64, 48, 1)))
 model.add(MaxPooling2D(2))
 
-model.add(Conv2D(128, 7, activation='relu'))
+model.add(Conv2D(64, 7, activation='relu'))
 model.add(MaxPooling2D(2))
 
 model.add(Flatten())
 
 model.add(Dense(64, activation='relu'))
-model.add(Dense(64, activation='relu'))
+model.add(Dense(32, activation='relu'))
 model.add(Dense(10, activation='softmax'))
+
+early_stop = EarlyStopping(patience=3)
+checkpoint = ModelCheckpoint('model.h5', monitor='val_acc', verbose=1, save_best_only=True, mode='max')
 
 model.summary()
 model.compile(optimizer=Adam(lr=0.0001), loss='categorical_crossentropy', metrics=["accuracy"])
-model.fit(x_train, y_train_categorical, epochs=7, shuffle=True, validation_split=0.2)
+model.fit(x_train, y_train_categorical, epochs=7, validation_split=0.1, callbacks=[checkpoint, early_stop])
 
 predictions = model.predict_classes(x_test)
-score = model.evaluate(x_test, y_test_categorical)
+loss, accuracy = model.evaluate(x_test, y_test_categorical)
 print(predictions)
 print(y_test)
-print(score)
+print("Loss: " + str(loss))
+print("Accuracy (%): " + str(accuracy*100))
 
 for i in range(len(x_test)):
     cv2.imshow("Actual: " + str(y_test[i]) + " Predicted: " + str(predictions[i]), x_test[i])
