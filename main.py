@@ -8,6 +8,7 @@ from keras.callbacks import EarlyStopping
 from keras.callbacks import ModelCheckpoint
 from keras.layers import Conv2D, MaxPooling2D
 from keras.layers import Dense, Dropout, Flatten
+from keras.models import load_model
 from sklearn.model_selection import train_test_split
 
 
@@ -31,7 +32,7 @@ np_images = np_images.reshape(-1, 64, 48, 1)
 x_train, x_test, y_train, y_test = train_test_split(np_images, np_digits, test_size=0.1, random_state=0)
 y_train_categorical = to_categorical(y_train, 10)
 y_test_categorical = to_categorical(y_test, 10)
-
+'''
 model = Sequential()
 model.add(Conv2D(64, 7, activation='relu', input_shape=(64, 48, 1)))
 model.add(MaxPooling2D(2))
@@ -47,10 +48,13 @@ model.add(Dense(10, activation='softmax'))
 
 early_stop = EarlyStopping(patience=3)
 checkpoint = ModelCheckpoint('model.h5', monitor='val_acc', verbose=1, save_best_only=True, mode='max')
-
+ModelCheckpoint
 model.summary()
 model.compile(optimizer=Adam(lr=0.0001), loss='categorical_crossentropy', metrics=["accuracy"])
 model.fit(x_train, y_train_categorical, epochs=7, validation_split=0.1, callbacks=[checkpoint, early_stop])
+'''
+# Load the model
+model = load_model('model.h5')
 
 predictions = model.predict_classes(x_test)
 loss, accuracy = model.evaluate(x_test, y_test_categorical)
